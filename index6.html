@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desserts Gallery</title>
+    <link rel="stylesheet" href="style6.css">
+</head>
+<body>
+    <div class="containe">
+    <nav>
+      <ul>
+        <li><a style="margin-right: 520px; font-weight: bold; font-size: larger;" href="index.html">The Kitchn</a></li>
+        <li><a href="index2.html">Latest</a></li>
+        <li><a href="index6.html">Gallery</a></li>
+        <li><a href="index3.html">About</a></li>
+        <li><a href="index5.html">Contact</a></li>
+        
+
+      </ul>
+      <div class="toggle" onclick="toggleMenu();"></div>
+    </nav>
+  </div>
+
+    <div class="header">
+        <h1>Sweet Desserts</h1>
+        <p>A delicious collection of dessert photography</p>
+    </div>
+
+    <div class="container">
+        <div class="gallery" id="gallery"></div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            Loading delicious desserts...
+        </div>
+
+        <div class="load-more" id="loadMore" style="display: none;">
+            <button class="load-more-btn" onclick="loadMoreDesserts()">Load More Desserts</button>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <footer class="footer">
+    <div class="socialicons">
+      <a href="https://wa.me/77010227770" target="_blank">
+  <img src="./surets/icons8-whatsapp-50.png" alt="WhatsApp" />
+</a>
+      <a href="https://t.me/woawoas"><img src="./surets/telegram.png" alt="telegram" /></a>
+      <a href="https://www.instagram.com/aisuzy_/"><img src="./surets/instagram.png" alt="instagram" /></a>
+    </div>
+
+    <div class="footer-links">
+      <a href="#">Info</a>
+      <a href="#">Support</a>
+      <a href="#">Marketing</a>
+    </div>
+
+    <div class="footer-links">
+      <a href="#">Terms of Use</a>
+      <a href="#">Privacy Policy</a>
+    </div>
+
+    <div class="footer-copy">
+      © 2025 Omar Co.
+    </div>
+  </footer>
+    
+
+    <script>
+        let currentPage = 0;
+        let allDesserts = [];
+        const dessertsPerPage = 12;
+
+
+        async function fetchDesserts() {
+            try {
+                const response = await fetch('https://www.themealdb.com/api/json/v1/1/filter.php?c=Dessert');
+                const data = await response.json();
+                return data.meals || [];
+            } catch (error) {
+                console.error('Error fetching desserts:', error);
+                return [];
+            }
+        }
+
+        function displayDesserts(desserts) {
+            const gallery = document.getElementById('gallery');
+            
+            desserts.forEach(dessert => {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item';
+                photoItem.onclick = () => openModal(dessert.strMealThumb, dessert.strMeal);
+                
+                photoItem.innerHTML = `
+                    <img src="${dessert.strMealThumb}" alt="${dessert.strMeal}" loading="lazy">
+                    <div class="photo-content">
+                        <div class="photo-title">${dessert.strMeal}</div>
+                        <div class="photo-description">A delightful dessert perfect for any occasion</div>
+                    </div>
+                `;
+                
+                gallery.appendChild(photoItem);
+            });
+        }
+
+        function loadMoreDesserts() {
+            const startIndex = currentPage * dessertsPerPage;
+            const endIndex = startIndex + dessertsPerPage;
+            const dessertsToShow = allDesserts.slice(startIndex, endIndex);
+            
+            if (dessertsToShow.length > 0) {
+                displayDesserts(dessertsToShow);
+                currentPage++;
+                
+                if (endIndex >= allDesserts.length) {
+                    document.getElementById('loadMore').style.display = 'none';
+                }
+            }
+        }
+
+        function openModal(imageSrc, title) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+            modalImg.alt = title;
+        }
+
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        async function initGallery() {
+            const loading = document.getElementById('loading');
+            const loadMore = document.getElementById('loadMore');
+            
+
+            allDesserts = await fetchDesserts();
+            
+
+            loading.style.display = 'none';
+            
+            if (allDesserts.length > 0) {
+                loadMoreDesserts();
+                
+
+                if (allDesserts.length > dessertsPerPage) {
+                    loadMore.style.display = 'block';
+                }
+            } else {
+                document.getElementById('gallery').innerHTML = '<p style="text-align: center; color: #95a5a6;">No desserts found. Please try again later.</p>';
+            }
+        }
+
+
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.5;
+            document.querySelector('.header').style.transform = `translateY(${rate}px)`;
+        });
+
+
+        initGallery();
+    </script>
+</body>
+</html>
